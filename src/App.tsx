@@ -1,3 +1,4 @@
+/* Chronos AI Productivity | v1.0.0 */
 import { useState, useEffect, type FormEvent, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -774,17 +775,24 @@ export default function App() {
                     ))
                   )}
                 </div>
-
-                <div className="mt-8 pt-8 border-t border-gray-100 dark:border-white/10 text-center">
-                  <p className="text-[10px] uppercase tracking-widest opacity-30 font-bold">
-                    Chronos AI Session Logger
-                  </p>
-                </div>
               </motion.div>
             </>
           )}
         </AnimatePresence>
       </main>
+
+      {/* Footer Branding */}
+      <footer className={cn(
+        "py-12 border-t text-center transition-colors duration-700",
+        isFocusMode ? "border-white/10" : "border-[#E8E8E6]"
+      )}>
+        <p className={cn(
+          "text-[10px] uppercase tracking-[0.5em] font-bold opacity-20 transition-colors duration-700",
+          isFocusMode ? "text-white" : "text-black"
+        )}>
+          Engineered for Deep Work & Practical Intelligence
+        </p>
+      </footer>
     </div>
   );
 }
