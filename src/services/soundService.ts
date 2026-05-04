@@ -1,57 +1,55 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
+// Minimal high-end sound service for tactical feedback
 class SoundService {
-  private context: AudioContext | null = null;
+  private audioContext: AudioContext | null = null;
+  private masterVolume: number = 0.15;
 
   private init() {
-    if (!this.context) {
-      this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (!this.audioContext) {
+      this.audioContext = new AudioContext();
     }
   }
 
-  private playTone(freq: number, type: OscillatorType, duration: number, volume: number) {
+  private playTone(freq: number, type: OscillatorType = 'sine', duration: number = 0.1, volume: number = 1) {
     this.init();
-    if (!this.context) return;
+    if (!this.audioContext) return;
 
-    const oscillator = this.context.createOscillator();
-    const gainNode = this.context.createGain();
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
 
-    oscillator.type = type;
-    oscillator.frequency.setValueAtTime(freq, this.context.currentTime);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, this.audioContext.currentTime);
 
-    gainNode.gain.setValueAtTime(volume, this.context.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + duration);
+    gain.gain.setValueAtTime(this.masterVolume * volume, this.audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
 
-    oscillator.connect(gainNode);
-    gainNode.connect(this.context.destination);
+    osc.connect(gain);
+    gain.connect(this.audioContext.destination);
 
-    oscillator.start();
-    oscillator.stop(this.context.currentTime + duration);
+    osc.start();
+    osc.stop(this.audioContext.currentTime + duration);
   }
 
-  // Subtle click for generic buttons
   playClick() {
-    this.playTone(800, 'sine', 0.1, 0.1);
+    this.playTone(800, 'sine', 0.05, 0.5);
   }
 
-  // Soft pop for submitting/distilling
   playSubmit() {
-    this.playTone(400, 'sine', 0.2, 0.15);
-    setTimeout(() => this.playTone(600, 'sine', 0.1, 0.1), 50);
+    this.playTone(400, 'sine', 0.2, 0.8);
+    setTimeout(() => this.playTone(600, 'sine', 0.3, 0.6), 100);
   }
 
-  // Unique shift for focus mode
-  playToggle(isEntering: boolean) {
-    if (isEntering) {
-      this.playTone(200, 'sine', 0.3, 0.1);
-      setTimeout(() => this.playTone(300, 'sine', 0.2, 0.05), 100);
+  playToggle(isOn: boolean) {
+    if (isOn) {
+      this.playTone(1000, 'sine', 0.1, 0.4);
+      setTimeout(() => this.playTone(1200, 'sine', 0.1, 0.3), 50);
     } else {
-      this.playTone(300, 'sine', 0.3, 0.1);
-      setTimeout(() => this.playTone(200, 'sine', 0.2, 0.05), 100);
+      this.playTone(1200, 'sine', 0.1, 0.4);
+      setTimeout(() => this.playTone(1000, 'sine', 0.1, 0.3), 50);
     }
+  }
+
+  setVolume(vol: number) {
+    this.masterVolume = Math.max(0, Math.min(1, vol));
   }
 }
 
