@@ -258,6 +258,7 @@ export default function App() {
         isFocusMode ? "bg-black border-white/10" : "bg-white border-[#E8E8E6]"
       )}>
         <button 
+          aria-label="Toggle Focus Mode"
           onClick={() => {
             const nextMode = !isFocusMode;
             setIsFocusMode(nextMode);
@@ -271,6 +272,7 @@ export default function App() {
           {isFocusMode ? <Zap size={20} /> : <Timer size={24} />}
         </button>
         <button 
+          aria-label="View History"
           onClick={() => {
             setShowHistory(!showHistory);
             soundService.playClick();
@@ -537,6 +539,7 @@ export default function App() {
                       <div className="text-[10px] uppercase tracking-[0.3em] opacity-40 font-bold">Practical Intelligence Stream</div>
                     </div>
                     <button
+                      aria-label="Copy to clipboard"
                       onClick={copyToClipboard}
                       className={cn(
                         "ml-auto p-3 rounded-2xl transition-all flex items-center gap-2",
@@ -720,6 +723,7 @@ export default function App() {
                     <h2 className="font-serif text-2xl italic">Chronology</h2>
                     {history.length > 0 && (
                       <button 
+                        aria-label="Clear All History"
                         onClick={clearAllHistory}
                         className={cn(
                           "ml-4 text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-md transition-all",
@@ -731,6 +735,7 @@ export default function App() {
                     )}
                   </div>
                   <button 
+                    aria-label="Close History"
                     onClick={() => setShowHistory(false)}
                     className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   >
@@ -759,6 +764,7 @@ export default function App() {
                         <div className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-2 flex justify-between">
                           <span>{new Date(item.timestamp).toLocaleDateString()} • {item.timeWindow} • {item.priority}</span>
                           <button 
+                            aria-label="Delete history item"
                             onClick={(e) => deleteHistoryItem(item.id, e)}
                             className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:text-red-500"
                           >
