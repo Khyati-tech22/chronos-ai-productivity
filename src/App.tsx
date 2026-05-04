@@ -18,6 +18,7 @@ import {
 import { getProductivityAdvice, type TimeWindow, type ProductivityResponse, type Priority } from './services/geminiService';
 import { soundService } from './services/soundService';
 import { cn } from './lib/utils';
+import { TIME_OPTIONS, PRIORITY_OPTIONS } from './lib/constants';
 
 interface HistoryItem {
   id: string;
@@ -156,32 +157,8 @@ export default function App() {
     soundService.playClick();
   };
 
-  const timeOptions: { value: TimeWindow; label: string; icon: any; description: string }[] = [
-    { 
-      value: '5-15m', 
-      label: 'Quick Sprint', 
-      icon: Zap, 
-      description: 'High-level summaries & fast wins' 
-    },
-    { 
-      value: '30-60m', 
-      label: 'Core Focus', 
-      icon: BookOpen, 
-      description: 'Concepts & mini-exercises' 
-    },
-    { 
-      value: '2h+', 
-      label: 'Deep Work', 
-      icon: Layers, 
-      description: 'Full dives & project plans' 
-    },
-  ];
-
-  const priorityOptions: { value: Priority; description: string }[] = [
-    { value: 'low', description: 'Focuses on low-friction entry points and enjoyable, steady progress.' },
-    { value: 'medium', description: 'A balanced approach with practical concepts and quality-of-life improvements.' },
-    { value: 'high', description: 'Be blunt, direct, and focus strictly on non-negotiable must-haves.' },
-  ];
+  const priorityOptions = PRIORITY_OPTIONS;
+  const timeOptions = TIME_OPTIONS;
 
   const Tooltip = ({ text, isFocusMode }: { text: string; isFocusMode: boolean }) => (
     <motion.div
