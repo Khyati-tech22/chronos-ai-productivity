@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { getProductivityAdvice, type TimeWindow, type ProductivityResponse, type Priority } from './services/geminiService';
 import { soundService } from './services/soundService';
-import { cn } from './lib/utils';
+import { cn, formatDate } from './lib/utils';
 import { TIME_OPTIONS, PRIORITY_OPTIONS } from './lib/constants';
 
 interface HistoryItem {
@@ -762,7 +762,7 @@ export default function App() {
                         )}
                       >
                         <div className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-2 flex justify-between">
-                          <span>{new Date(item.timestamp).toLocaleDateString()} • {item.timeWindow} • {item.priority}</span>
+                          <span>{formatDate(item.timestamp)} • {item.timeWindow} • {item.priority}</span>
                           <button 
                             aria-label="Delete history item"
                             onClick={(e) => deleteHistoryItem(item.id, e)}
