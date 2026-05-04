@@ -66,6 +66,9 @@ export async function getProductivityAdvice(
     return JSON.parse(text);
   } catch (error) {
     console.error("Gemini Error:", error);
+    if (error instanceof Error && error.message.includes('fetch')) {
+      throw new Error("Network connectivity issue detected. Please check your connection.");
+    }
     throw error;
   }
 }
