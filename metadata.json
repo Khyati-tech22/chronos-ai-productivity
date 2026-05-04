@@ -1,0 +1,6 @@
+{
+  "name": "Chronos AI Productivity",
+  "description": "A time-aware productivity assistant that filters tasks and advice through your current schedule constraints. Select your time window and get practical intelligence instantly.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
