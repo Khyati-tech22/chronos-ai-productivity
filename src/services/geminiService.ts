@@ -18,33 +18,29 @@ export async function getProductivityAdvice(
   timeWindow: TimeWindow,
   priority: Priority
 ): Promise<ProductivityResponse> {
-  // Using gemini-1.5-flash for maximum reliability and speed
+  // Switched to gemini-1.5-flash-8b for higher rate limits on free tier if available, 
+  // or sticking to gemini-1.5-flash
   const model = "gemini-1.5-flash";
   
   const systemInstruction = `
     You are Chronos, a Time-Aware Productivity AI. Your primary directive is to provide "Practical Intelligence" by filtering all responses through the user's current time constraints and task priority.
 
-    CONTEXT:
-    The current local time is: ${new Date().toISOString()}.
-
     OPERATIONAL PROTOCOL:
-    1. ALWAYS check the user's mentioned availability, schedule, or deadlines in their query.
-    2. Consider the Priority level:
-       - 'high': RUTHLESS EFFICIENCY. Be blunt, direct, and focus strictly on non-negotiable must-haves. Eliminate all fluff. Focus on high-impact, high-stakes actions.
-       - 'medium': Balanced approach with quality-of-life tips, steady progression, and strategic context.
-       - 'low': Focus on low-friction entry points, enjoyable progress, and building momentum through small wins.
-    3. Scale depth based on time window:
-       - '5-15m': High-level summaries & immediate quick wins. Focus on what can be done RIGHT NOW.
-       - '30-60m': Core concepts, tactical execution steps, & mini-exercises. Provide enough detail for a solid working session.
-       - '2h+': DEEP RESEARCH & FULL PROJECT ARCHITECTURE. Provide high-density information, comprehensive project plans, research frameworks, and complex milestones. Be extraordinarily thorough. If the user asks for research, provide deep analysis, source suggestions, and structural outlines.
-    4. BE REALISTIC but ambitious for long windows. For '2h+', maximize the quantity and quality of actionable steps.
-    5. Format: Strict JSON following this schema:
+    1. Priority level:
+       - 'high': RUTHLESS EFFICIENCY. Be blunt and direct.
+       - 'medium': Balanced approach.
+       - 'low': Focus on low-friction entry points.
+    2. Depth:
+       - '5-15m': High-level quick wins.
+       - '30-60m': Tactical execution steps.
+       - '2h+': DEEP RESEARCH & FULL PROJECT ARCHITECTURE.
+    3. Format: Strict JSON:
     {
-      "title": "Short catchy title",
-      "summary": "Practical overview with high information density",
-      "steps": ["Step 1 with detail", "Step 2 with detail", ...],
-      "warning": "Optional strategic warning",
-      "miniExercise": "Optional deep-thought exercise"
+      "title": "Short title",
+      "summary": "Dense overview",
+      "steps": ["Step 1", "Step 2", ...],
+      "warning": "Optional warning",
+      "miniExercise": "Optional exercise"
     }
   `;
 
@@ -53,35 +49,36 @@ export async function getProductivityAdvice(
       throw new Error("Missing GEMINI_API_KEY. Please set this environment variable.");
     }
 
-    const genModel = ai.getGenerativeModel({ 
+    const response = await ai.models.generateContent({
       model,
       systemInstruction,
-      generationConfig: {
+      contents: `Goal: ${task}\nTime: ${timeWindow}\nPriority: ${priority}`,
+      config: {
         responseMimeType: "application/json",
-      }
+      },
     });
 
-    const result = await genModel.generateContent(`Task/Goal: ${task}\nTime Window: ${timeWindow}\nPriority: ${priority}`);
-    const response = await result.response;
-    const text = response.text();
-    
+    const text = response.text;
     if (!text) throw new Error("Empty response from AI");
     
-    console.log("Gemini Response Text:", text); // Debugging log
-
     try {
       return JSON.parse(text);
     } catch (e) {
-      console.error("JSON Parse Error. Raw Text:", text);
-      // Attempt to clean the response if it's wrapped in markdown
       const cleanedText = text.replace(/```json\n?|\n?```/g, "").trim();
       return JSON.parse(cleanedText);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini Service Error:", error);
+    
+    // Specific error handling for Quota/Rate Limits
+    if (error?.status === 429 || (error?.message && error.message.includes('429')) || (error?.message && error.message.includes('exhausted'))) {
+      throw new Error("QUOTA EXHAUSTED: You've hit the Gemini API free tier limit. Please wait a minute or check your Google AI Studio billing.");
+    }
+    
     if (error instanceof Error && error.message.includes('fetch')) {
       throw new Error("Network connectivity issue detected. Please check your connection.");
     }
+    
     throw error;
   }
 }

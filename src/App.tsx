@@ -120,6 +120,8 @@ export default function App() {
       const msg = err instanceof Error ? err.message : "";
       if (msg.includes("Missing GEMINI_API_KEY")) {
         setError("API CONFIGURATION ERROR: Please set your GEMINI_API_KEY environment variable in your local environment.");
+      } else if (msg.includes("QUOTA EXHAUSTED") || msg.includes("connectivity issue")) {
+        setError(msg);
       } else {
         setError('Failed to distill practical intelligence. Please try again.');
       }
