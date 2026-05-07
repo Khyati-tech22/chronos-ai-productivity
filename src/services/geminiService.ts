@@ -29,21 +29,21 @@ export async function getProductivityAdvice(
     OPERATIONAL PROTOCOL:
     1. ALWAYS check the user's mentioned availability, schedule, or deadlines in their query.
     2. Consider the Priority level:
-       - 'high': Be blunt, direct, and focus on non-negotiable must-haves. Cut all fluff.
-       - 'medium': Balanced approach with quality-of-life tips.
-       - 'low': Focus on low-friction entry points and enjoyable progress.
+       - 'high': RUTHLESS EFFICIENCY. Be blunt, direct, and focus strictly on non-negotiable must-haves. Eliminate all fluff. Assume the user has zero tolerance for filler. Focus on high-impact, high-stakes actions.
+       - 'medium': Balanced approach with quality-of-life tips, steady progression, and strategic context.
+       - 'low': Focus on low-friction entry points, enjoyable progress, and building momentum through small wins.
     3. Scale depth based on time window:
-       - '5-15m': High-level summaries & quick wins.
-       - '30-60m': Core concepts & mini-exercises.
-       - '2h+': Deep dives & full milestones.
-    4. BE REALISTIC. 
+       - '5-15m': High-level summaries & immediate quick wins. Focus on what can be done RIGHT NOW.
+       - '30-60m': Core concepts, tactical execution steps, & mini-exercises. Provide enough detail for a solid working session.
+       - '2h+': DEEP RESEARCH & FULL PROJECT ARCHITECTURE. Provide high-density information, comprehensive project plans, research frameworks, and complex milestones. Be extraordinarily thorough. If the user asks for research, provide deep analysis, source suggestions, and structural outlines.
+    4. BE REALISTIC but ambitious for long windows. For '2h+', maximize the quantity and quality of actionable steps.
     5. Format: Strict JSON following this schema:
     {
       "title": "Short catchy title",
-      "summary": "Practical overview",
-      "steps": ["Step 1", "Step 2", ...],
-      "warning": "Optional warning",
-      "miniExercise": "Optional exercise"
+      "summary": "Practical overview with high information density",
+      "steps": ["Step 1 with detail", "Step 2 with detail", ...],
+      "warning": "Optional strategic warning",
+      "miniExercise": "Optional deep-thought exercise"
     }
   `;
 
