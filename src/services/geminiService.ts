@@ -18,7 +18,8 @@ export async function getProductivityAdvice(
   timeWindow: TimeWindow,
   priority: Priority
 ): Promise<ProductivityResponse> {
-  const model = "gemini-3-flash-preview";
+  // Using gemini-1.5-flash for maximum reliability and speed
+  const model = "gemini-1.5-flash";
   
   const systemInstruction = `
     You are Chronos, a Time-Aware Productivity AI. Your primary directive is to provide "Practical Intelligence" by filtering all responses through the user's current time constraints and task priority.
@@ -29,7 +30,7 @@ export async function getProductivityAdvice(
     OPERATIONAL PROTOCOL:
     1. ALWAYS check the user's mentioned availability, schedule, or deadlines in their query.
     2. Consider the Priority level:
-       - 'high': RUTHLESS EFFICIENCY. Be blunt, direct, and focus strictly on non-negotiable must-haves. Eliminate all fluff. Assume the user has zero tolerance for filler. Focus on high-impact, high-stakes actions.
+       - 'high': RUTHLESS EFFICIENCY. Be blunt, direct, and focus strictly on non-negotiable must-haves. Eliminate all fluff. Focus on high-impact, high-stakes actions.
        - 'medium': Balanced approach with quality-of-life tips, steady progression, and strategic context.
        - 'low': Focus on low-friction entry points, enjoyable progress, and building momentum through small wins.
     3. Scale depth based on time window:
@@ -51,21 +52,33 @@ export async function getProductivityAdvice(
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("Missing GEMINI_API_KEY. Please set this environment variable.");
     }
-    const response = await ai.models.generateContent({
+
+    const genModel = ai.getGenerativeModel({ 
       model,
-      contents: `Task/Goal: ${task}\nTime Window: ${timeWindow}\nPriority: ${priority}`,
-      config: {
-        systemInstruction,
+      systemInstruction,
+      generationConfig: {
         responseMimeType: "application/json",
-      },
+      }
     });
 
-    const text = response.text;
+    const result = await genModel.generateContent(`Task/Goal: ${task}\nTime Window: ${timeWindow}\nPriority: ${priority}`);
+    const response = await result.response;
+    const text = response.text();
+    
     if (!text) throw new Error("Empty response from AI");
     
-    return JSON.parse(text);
+    console.log("Gemini Response Text:", text); // Debugging log
+
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error("JSON Parse Error. Raw Text:", text);
+      // Attempt to clean the response if it's wrapped in markdown
+      const cleanedText = text.replace(/```json\n?|\n?```/g, "").trim();
+      return JSON.parse(cleanedText);
+    }
   } catch (error) {
-    console.error("Gemini Error:", error);
+    console.error("Gemini Service Error:", error);
     if (error instanceof Error && error.message.includes('fetch')) {
       throw new Error("Network connectivity issue detected. Please check your connection.");
     }
