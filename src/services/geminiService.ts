@@ -18,23 +18,22 @@ export async function getProductivityAdvice(
   timeWindow: TimeWindow,
   priority: Priority
 ): Promise<ProductivityResponse> {
-  // Switched to gemini-1.5-flash-8b for higher rate limits on free tier if available, 
-  // or sticking to gemini-1.5-flash
-  const model = "gemini-1.5-flash";
+  // Using gemini-2.0-flash which is more reliably supported on v1beta
+  const model = "gemini-2.0-flash";
   
   const systemInstruction = `
     You are Chronos, a Time-Aware Productivity AI. Your primary directive is to provide "Practical Intelligence" by filtering all responses through the user's current time constraints and task priority.
 
     OPERATIONAL PROTOCOL:
     1. Priority level:
-       - 'high': RUTHLESS EFFICIENCY. Be blunt and direct.
+       - 'high': RUTHLESS EFFICIENCY. Be blunt and direct. Focus on non-negotiable must-haves.
        - 'medium': Balanced approach.
        - 'low': Focus on low-friction entry points.
-    2. Depth:
+    2. Depth based on window:
        - '5-15m': High-level quick wins.
-       - '30-60m': Tactical execution steps.
-       - '2h+': DEEP RESEARCH & FULL PROJECT ARCHITECTURE.
-    3. Format: Strict JSON:
+       - '30-60m': Tactical execution steps & mini-exercises.
+       - '2h+': DEEP RESEARCH & FULL PROJECT ARCHITECTURE. Provide high-density info.
+    3. Format: Strict JSON following this schema:
     {
       "title": "Short title",
       "summary": "Dense overview",
@@ -70,12 +69,18 @@ export async function getProductivityAdvice(
   } catch (error: any) {
     console.error("Gemini Service Error:", error);
     
-    // Specific error handling for Quota/Rate Limits
-    if (error?.status === 429 || (error?.message && error.message.includes('429')) || (error?.message && error.message.includes('exhausted'))) {
+    const msg = error?.message || "";
+    const status = error?.status || error?.code || "";
+
+    if (status === 429 || msg.includes('429') || msg.includes('exhausted')) {
       throw new Error("QUOTA EXHAUSTED: You've hit the Gemini API free tier limit. Please wait a minute or check your Google AI Studio billing.");
     }
     
-    if (error instanceof Error && error.message.includes('fetch')) {
+    if (status === 404 || msg.includes('404') || msg.includes('not found')) {
+      throw new Error(`MODEL NOT FOUND: The selected model (${model}) is currently unavailable or the API key is restricted.`);
+    }
+
+    if (error instanceof Error && msg.includes('fetch')) {
       throw new Error("Network connectivity issue detected. Please check your connection.");
     }
     
